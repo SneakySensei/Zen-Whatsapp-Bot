@@ -3,6 +3,7 @@ import fastify from "fastify";
 import mongoose from "mongoose";
 
 import createWhatsappBot from "./services/whatsappBot";
+import { startMonitoring, stopMonitoring } from "./services/uptimeRobot";
 
 import { assertExists } from "./utils";
 
@@ -20,6 +21,7 @@ dotenv.config();
     if (!client.pupPage || client.pupPage.isClosed()) {
       await client.initialize();
       await client.sendPresenceUnavailable();
+      await startMonitoring();
     }
 
     res.status(200).send({
@@ -32,6 +34,7 @@ dotenv.config();
     // stop client
     if (client.pupPage && !client.pupPage.isClosed()) {
       await client.destroy();
+      await stopMonitoring();
     }
 
     res
