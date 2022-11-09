@@ -1,4 +1,4 @@
-import { Client, RemoteAuth } from "whatsapp-web.js";
+import { Client, RemoteAuth, MessageTypes } from "whatsapp-web.js";
 import { MongoStore } from "wwebjs-mongo";
 import qrcode from "qrcode-terminal";
 import mongoose from "mongoose";
@@ -19,13 +19,31 @@ export default async function createWhatsappBot() {
   });
 
   client.on("ready", () => {
-    console.log("Client is ready!");
+    console.log("📱 Bot turned on.");
   });
 
-  client.on("message", (msg) => {
-    if (msg.body == "!ping") {
-      client.sendMessage(msg.from, "pong");
-    }
+  client.on("disconnected", () => {
+    console.log("📴 Bot turned off.");
+  });
+
+  client.on("message", async (msg) => {
+    const isGroup = (await msg.getChat()).isGroup;
+    const mentionsMe = (await msg.getMentions()).some(
+      (contact) => contact.isMe
+    );
+    const isRelevantMesssage =
+      msg.type === MessageTypes.TEXT ||
+      msg.type === MessageTypes.AUDIO ||
+      msg.type === MessageTypes.VOICE;
+    setTimeout(() => {
+      if ((isGroup && mentionsMe) || (!isGroup && isRelevantMesssage)) {
+        client.sendMessage(
+          msg.from,
+          "Hi, this is Ditto, Snehil's focus bot! 🤖\n\nSnehil is currently offline but he'll get back to you soon. If it's urgent, kindly contact him through a phone call."
+        );
+      }
+      client.markChatUnread(msg.from);
+    }, Math.random() * 5000);
   });
 
   return client;
