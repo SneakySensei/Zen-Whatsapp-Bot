@@ -69,7 +69,7 @@ dotenv.config();
 
       res.status(200).send({
         success: true,
-        message: "Bot started. Happy Detoxing!",
+        message: "Bot started. Stay focussed!",
       });
     }
   );
